@@ -1,0 +1,26 @@
+{# templates/category/show.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block body %}
+    <h1>{{ category.name }}</h1>
+    
+    <h2>Programs :</h2>
+    {% if programs is empty %}
+        <p>Aucun program trouvé.</p>
+    {% else %}
+        <ul>
+            {% for program in programs %}
+                <li>
+                    <strong>ID :</strong> {{ program.id }}<br>
+                    <strong>Titre :</strong> {{ program.title }}<br>
+                    <strong>Résumé :</strong> {{ program.synopsis }}
+                    <a href="{{ path("program_show", { 'id': program.id }) }}">Voir la fiche</a>
+
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

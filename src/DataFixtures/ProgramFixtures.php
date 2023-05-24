@@ -12,9 +12,11 @@ class ProgramFixtures extends Fixture implements DependentFixtureInterface
     {
         for ($i = 0; $i <= 5; $i++){
         $program = new Program();
-        $program->setTitle('walking dead' .$i);
-        $program->setSynopsis('Des zombies envahissent la terre' .$i);
-        $program->setCategory($this->getReference('category_Action' ));
+        $program->setTitle('Program' . $i);
+        $program->setSynopsis('Synopsis' . $i);
+        $radomCategoryKey = array_rand(CategoryFixtures::CATEGORIES);
+        $categoryName = CategoryFixtures::CATEGORIES[$radomCategoryKey];
+        $program->setCategory($this->getReference('category_' .$categoryName ));
         $manager->persist($program);
     }
        
