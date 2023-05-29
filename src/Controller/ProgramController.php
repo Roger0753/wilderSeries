@@ -25,9 +25,8 @@ class ProgramController extends AbstractController
     }
     #[Route('/{id}/', methods: ['GET'],requirements: ['id'=>'\d+'], name: 'show')]
 
-    public function show(int $id, ProgramRepository $programRepository): Response
+    public function show( Program $program): Response
     {
-        $program = $programRepository->findOneBy(['id' => $id]);
         if(!$program){
             throw $this->createNotfoundException(
               'No Program with id : ' .$id. ' found in program\'s table.'  
@@ -38,12 +37,11 @@ class ProgramController extends AbstractController
            ]);    
     }
 
-    #[Route('/{programId}/season/{seasonId}/', name: 'season_show')]
+    #[Route('/{program}/season/{season}/', name: 'season_show')]
 
-    public function showSeason(int $programId, int $seasonId, ProgramRepository $programRepository, SeasonRepository $seasonRepository, EpisodeRepository $episodeRepository)
+    public function showSeason(Program $program,Season $season, EpisodeRepository $episodeRepository):Response
     {
-        $program = $programRepository->findOneBy(['id' => $programId]);
-        $season = $seasonRepository->findOneBy(['id' => $seasonId]);
+    
         $episodes = $episodeRepository->findBy(['season' => $season]);
         if (!$program){
             throw $this->createNotFoundException('aucun program avec le numero :' .$programId . 'n\'a été trouvé dans les series');
@@ -58,25 +56,25 @@ class ProgramController extends AbstractController
            ]); 
     }
 
-    public function showEpisode(int $programId, int $seasonId, ProgramRepository $programRepository, SeasonRepository $seasonRepository, EpisodeRepository $episodeRepository)
+    #[Route('/{program}/season/{season}/episode/{episode}/', name: 'episode_show')]
+
+    public function showEpisode(Program $program, Season $season, Episode $episode) : Response
     {
-        $program = $programRepository->find($programId);
-        $season = $seasonRepository->find($seasonId);
-        $episodes = $episodeRepository->findBy(['sesason' => $seasonId]);
         if (!$program){
-            throw $this->createNotFoundException('aucun program avec le numero :' .$program->getId . 'n\'a été trouvé dans les series');
+            throw $this->createNotFoundException('aucun program avec le numero :' .$program->getId() . 'n\'a été trouvé dans les series');
         }
         if (!$season){
-            throw $this->createNotFoundException('aucune saison avec le numero :' .$season->getId . 'n\'a été trouvé dans les saisons');
+            throw $this->createNotFoundException('aucune saison avec le numero :' .$season->getId() . 'n\'a été trouvé dans les saisons');
         }
 
-        if (!$episodes){
-            throw $this->createNotFoundException('aucun episode avec le numero :' .$episodes->getId . 'n\'a été trouvé dans les saisons');
+        if (!$episode){
+            throw $this->createNotFoundException('aucun episode avec le numero :' .$episode->getId() . 'n\'a été trouvé dans les saisons');
         }
-        return $this->render('program/season_show.html.twig', [
-            'programs' => $program,
-            'seasons' => $season,
-            'episodes' => $episodes,
+        return $this->render('program/episode_show.html.twig', [
+            'program' => $program,
+            'season' => $season,
+            'episode' => $episode,
            ]); 
     }
+
 }
