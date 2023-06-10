@@ -2,25 +2,34 @@
 // src/Controller/ProgramController.php
 namespace App\Controller;
 
-use App\Repository\ProgramRepository;
-use App\Repository\SeasonRepository;
-use App\Repository\EpisodeRepository;
-use App\Form\ProgramType;
 use App\Entity\Season;
 use App\Entity\Episode;
 use App\Entity\Program;
+use App\Form\ProgramType;
+use App\Repository\SeasonRepository;
+use App\Repository\EpisodeRepository;
+use App\Repository\ProgramRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 #[Route('/program', name: 'program_')]
 class ProgramController extends AbstractController
 {#[Route('/', name: 'index')]
 
-    public function index(ProgramRepository $programRepository): Response
-    {   $programs = $programRepository->findAll(); 
+    public function index(ProgramRepository $programRepository, RequestStack $requestStack): Response
+    {   $session = $requestStack->getSession();
+        if (!$session->has('total')){
+            $session->set('total', 0);
+        }
+
+        $total = $session->get('total');
+
+        $programs = $programRepository->findAll(); 
         return $this->render('program/index.html.twig', [
          'programs' => $programs,
         ]);
@@ -36,8 +45,11 @@ public function new(Request $request, ProgramRepository $programRepository) : Re
     // Get data from HTTP request
     $form->handleRequest($request);
     // Was the form submitted ?
-    if ($form->isSubmitted()) {
+    if ($form->isSubmitted && $form->isValid()) {
         $programRepository->save($program, true);
+
+       // Once the form is submitted, valid and the data inserted in database, you can define the success flash message
+       $this->addFlash('success', 'The new program has been created');
         // Deal with the submitted data
         // For example : persiste & flush the entity
         // And redirect to a route that display the result
@@ -46,6 +58,7 @@ public function new(Request $request, ProgramRepository $programRepository) : Re
 
     // Render the form
     return $this->render('program/new.html.twig', [
+        'program' => $program,
         'form' => $form,
     ]);
 }
